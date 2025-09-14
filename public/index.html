@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 120px 1fr 120px 1fr;
+      gap: 10px 15px;
+      max-width: 700px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      text-align: right;
+      padding-top: 5px;
+    }
+
+    input,
+    select,
+    button {
+      padding: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      justify-self: end;
+      /* align button to the right */
+    }
+
+    #expensesTable {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #expensesTable th,
+    #expensesTable td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: left;
+    }
+
+    #expensesTable th {
+      background: #f4f4f4;
+    }
+  </style>
+  <!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+</head>
+
+<body>
+  <h2>Expense Tracker</h2>
+  <form id="expenseForm">
+    <!-- Row 1: Date -->
+    <label for="date">Date:</label>
+    <input type="date" id="date" required style="grid-column: span 3;">
+
+    <!-- Row 2: Note + Amount -->
+    <label for="note">Details:</label>
+    <input type="text" id="note" placeholder="Optional note">
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount" required>
+
+    <!-- Row 3: Paid By + Category -->
+    <label for="paid_by">Paid By:</label>
+    <select id="paid_by" required></select>
+    <label for="category">Category:</label>
+    <select id="category" required></select>
+
+    <!-- Row 4: Recurring + ThreeFs -->
+    <label for="recurring">Recurring:</label>
+    <select id="recurring" required>
+      <option value="No">No</option>
+      <option value="Yes">Yes</option>
+    </select>
+    <label for="threefs">ThreeFs:</label>
+    <select id="threefs" required>
+      <option value="Fixed">Fixed</option>
+      <option value="Fun">Fun</option>
+      <option value="Future">Future</option>
+    </select>
+
+    <!-- Row 5: Custom -->
+    <label for="custom">Custom Details:</label>
+    <input type="text" id="custom" placeholder="Enter details" style="grid-column: span 3;">
+
+    <!-- Row 6: Button -->
+    <div></div>
+    <div></div>
+    <div></div>
+    <button type="submit">Add Expense</button>
+  </form>
+
+  <h3>All Expenses</h3>
+  <button onclick="loadExpenses()">Refresh</button>
+  <table id="expensesTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Note</th>
+        <th>Paid By</th>
+        <th>Recurring</th>
+        <th>ThreeFs</th>
+        <th>Custom Details</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!--
+  <h3>Reports</h3>
+  <button onclick="loadMonthlyReport()">Monthly Report</button>
+  <button onclick="loadYearlyReport()">Yearly Report</button>
+
+  <canvas id="monthlyChart" width="600" height="300"></canvas>
+  <canvas id="yearlyChart" width="600" height="300"></canvas>
+  -->
+
+  <script>
+    document.getElementById("expenseForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const expense = {
+        date: document.getElementById("date").value,
+        amount: parseFloat(document.getElementById("amount").value),
+        category: document.getElementById("category").value,
+        note: document.getElementById("note").value,
+        paid_by: document.getElementById("paid_by").value
+      };
+      await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(expense)
+      });
+      loadExpenses();
+      e.target.reset();
+    });
+
+    async function loadExpenses() {
+      const res = await fetch("/api/expenses");
+      const data = await res.json();
+      const tbody = document.querySelector("#expensesTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(exp => {
+        const row = `<tr>
+          <td>${exp.date}</td>
+          <td>${exp.note || ""}</td>
+          <td>$${exp.amount.toFixed(2)}</td>
+          <td>${exp.paid_by}</td>
+          <td>${exp.category}</td>
+          <td>${exp.recurring}</td>
+          <td>${exp.threefs}</td>
+          <td>${exp.custom || ""}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+
+    async function loadCategories() {
+      const res = await fetch("/api/categories");
+      const categories = await res.json();
+      const select = document.getElementById("category"); //put inside config
+      select.innerHTML = ""; // clear existing options
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      });
+    }
+
+
+    async function loadPaidBy() {
+      const res = await fetch("/api/paidby");
+      const paidBys = await res.json();
+      const select = document.getElementById("paid_by");
+      select.innerHTML = "";
+      paidBys.forEach(pb => {
+        const option = document.createElement("option");
+        option.value = pb;
+        option.textContent = pb;
+        select.appendChild(option);
+      });
+    }
+
+    loadPaidBy();
+    loadCategories();
+    loadExpenses();
+
+  </script>
+  <!--
+  <script>
+  let monthlyChart, yearlyChart;
+  
+  async function loadMonthlyReport() {
+  const year = new Date().getFullYear();
+  const res = await fetch(`/api/report/monthly/${year}`);
+  const data = await res.json();
+  
+  const labels = data.map(d => d.month);
+  const totals = data.map(d => d.total);
+  
+  const ctx = document.getElementById('monthlyChart').getContext('2d');
+  if (monthlyChart) monthlyChart.destroy(); // remove old chart
+  monthlyChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+      labels: labels,
+      datasets: [{
+          label: `Monthly Expenses for ${year}`,
+          data: totals,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)'
+      }]
+      },
+      options: { responsive: true }
+  });
+  }
+  
+  async function loadYearlyReport() {
+  const year = new Date().getFullYear();
+  const res = await fetch(`/api/report/year/${year}`);
+  const data = await res.json();
+  
+  const labels = data.map(d => d.category);
+  const totals = data.map(d => d.total);
+  
+  const ctx = document.getElementById('yearlyChart').getContext('2d');
+  if (yearlyChart) yearlyChart.destroy(); // remove old chart
+  yearlyChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+      labels: labels,
+      datasets: [{
+          label: `Expenses by Category for ${year}`,
+          data: totals,
+          backgroundColor: [
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)'
+          ]
+      }]
+      },
+      options: { responsive: true }
+  });
+  }
+  </script>
+  -->
+
+</body>
+
+</html>
