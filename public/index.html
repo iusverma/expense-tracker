@@ -70,7 +70,7 @@
     <label for="note">Details:</label>
     <input type="text" id="note" placeholder="Optional note">
     <label for="amount">Amount:</label>
-    <input type="number" id="amount" placeholder="Enter amount" required>
+    <input type="number" id="amount" placeholder="Enter amount" required step="0.01">
 
     <!-- Row 3: Paid By + Category -->
     <label for="paid_by">Paid By:</label>
@@ -107,18 +107,27 @@
       e.preventDefault();
       const expense = {
         date: document.getElementById("date").value,
-        amount: parseFloat(document.getElementById("amount").value),
-        category: document.getElementById("category").value,
         note: document.getElementById("note").value,
-        paid_by: document.getElementById("paid_by").value
+        amount: parseFloat(document.getElementById("amount").value),
+        paid_by: document.getElementById("paid_by").value,
+        category: document.getElementById("category").value,
+        recurring: document.getElementById("recurring").value,
+        threefs: document.getElementById("threefs").value,
+        custom: document.getElementById("custom").value
       };
-      await fetch("/api/expenses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expense)
-      });
-      loadExpenses();
-      e.target.reset();
+
+        // Send data to server
+        await fetch("/api/expenses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(expense)
+        });
+
+        // Reset form
+        e.target.reset();
+
+        // Set focus back to the first field
+        document.getElementById("date").focus();
     });
 
     async function loadCategories() {
