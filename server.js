@@ -9,7 +9,7 @@ const path = require("path");
 
 // Serve categories from file
 app.get("/api/categories", (req, res) => {
-  const filePath = path.join(__dirname, "category.txt");
+  const filePath = path.join(__dirname, "config/category.txt");
   fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
       return res.status(500).json({ error: "Failed to read categories" });
@@ -52,7 +52,7 @@ app.get("/api/expenses/month/:ym", (req, res) => {
 
 // Serve paid_by options from file
 app.get("/api/paidby", (req, res) => {
-  const filePath = path.join(__dirname, "paidby.txt");
+  const filePath = path.join(__dirname, "config/paidby.txt");
   fs.readFile(filePath, "utf8", (err, data) => {
     if (err) return res.status(500).json({ error: "Cannot read paid_by options" });
     const paidByOptions = data.split(/\r?\n/).filter(line => line.trim() !== "");
