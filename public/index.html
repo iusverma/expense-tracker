@@ -52,7 +52,7 @@
       background: #f4f4f4;
     }
   </style>
-  <!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+
 </head>
 
 <body>
@@ -102,26 +102,6 @@
     <button type="submit">Add Expense</button>
   </form>
 
-  <!--
-  <h3>All Expenses</h3>
-  <button onclick="loadExpenses()">Refresh</button>
-  <table id="expensesTable">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Amount</th>
-        <th>Category</th>
-        <th>Note</th>
-        <th>Paid By</th>
-        <th>Recurring</th>
-        <th>ThreeFs</th>
-        <th>Custom Details</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
--->
-
   <script>
     document.getElementById("expenseForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -141,29 +121,6 @@
       e.target.reset();
     });
 
-    /*
-    async function loadExpenses() {
-      const res = await fetch("/api/expenses");
-      const data = await res.json();
-      const tbody = document.querySelector("#expensesTable tbody");
-      tbody.innerHTML = "";
-      data.forEach(exp => {
-        const row = `<tr>
-          <td>${exp.date}</td>
-          <td>${exp.note || ""}</td>
-          <td>$${exp.amount.toFixed(2)}</td>
-          <td>${exp.paid_by}</td>
-          <td>${exp.category}</td>
-          <td>${exp.recurring}</td>
-          <td>${exp.threefs}</td>
-          <td>${exp.custom || ""}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-      });
-    }
-    */
-
-
     async function loadCategories() {
       const res = await fetch("/api/categories");
       const categories = await res.json();
@@ -176,7 +133,6 @@
         select.appendChild(option);
       });
     }
-
 
     async function loadPaidBy() {
       const res = await fetch("/api/paidby");
@@ -193,7 +149,6 @@
 
     loadPaidBy();
     loadCategories();
-    //loadExpenses();
 
   </script>
 

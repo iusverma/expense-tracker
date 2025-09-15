@@ -40,13 +40,16 @@ app.get("/api/expenses", (req, res) => {
 });
 
 // Expenses for a month (YYYY-MM)
-app.get("/api/expenses/month/:ym", (req, res) => {
-  const ym = req.params.ym;
+app.get("/api/expenses/month/:year/:month", (req, res) => {
+  const { year, month } = req.params;
+  const ym = `${year}-${String(month).padStart(2, "0")}`;
+
   const rows = db.prepare(`
     SELECT * FROM expenses
     WHERE strftime('%Y-%m', date) = ?
     ORDER BY date DESC
   `).all(ym);
+
   res.json(rows);
 });
 
