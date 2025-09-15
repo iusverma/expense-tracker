@@ -56,6 +56,10 @@
 </head>
 
 <body>
+  <div style="position: fixed; top: 20px; right: 20px;">
+    <a href="reports.html">📊 Reports</a>
+  </div>
+
   <h2>Expense Tracker</h2>
   <form id="expenseForm">
     <!-- Row 1: Date -->
@@ -98,6 +102,7 @@
     <button type="submit">Add Expense</button>
   </form>
 
+  <!--
   <h3>All Expenses</h3>
   <button onclick="loadExpenses()">Refresh</button>
   <table id="expensesTable">
@@ -115,15 +120,7 @@
     </thead>
     <tbody></tbody>
   </table>
-
-  <!--
-  <h3>Reports</h3>
-  <button onclick="loadMonthlyReport()">Monthly Report</button>
-  <button onclick="loadYearlyReport()">Yearly Report</button>
-
-  <canvas id="monthlyChart" width="600" height="300"></canvas>
-  <canvas id="yearlyChart" width="600" height="300"></canvas>
-  -->
+-->
 
   <script>
     document.getElementById("expenseForm").addEventListener("submit", async (e) => {
@@ -144,6 +141,7 @@
       e.target.reset();
     });
 
+    /*
     async function loadExpenses() {
       const res = await fetch("/api/expenses");
       const data = await res.json();
@@ -163,6 +161,7 @@
         tbody.innerHTML += row;
       });
     }
+    */
 
 
     async function loadCategories() {
@@ -194,67 +193,9 @@
 
     loadPaidBy();
     loadCategories();
-    loadExpenses();
+    //loadExpenses();
 
   </script>
-  <!--
-  <script>
-  let monthlyChart, yearlyChart;
-  
-  async function loadMonthlyReport() {
-  const year = new Date().getFullYear();
-  const res = await fetch(`/api/report/monthly/${year}`);
-  const data = await res.json();
-  
-  const labels = data.map(d => d.month);
-  const totals = data.map(d => d.total);
-  
-  const ctx = document.getElementById('monthlyChart').getContext('2d');
-  if (monthlyChart) monthlyChart.destroy(); // remove old chart
-  monthlyChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-      labels: labels,
-      datasets: [{
-          label: `Monthly Expenses for ${year}`,
-          data: totals,
-          backgroundColor: 'rgba(75, 192, 192, 0.6)'
-      }]
-      },
-      options: { responsive: true }
-  });
-  }
-  
-  async function loadYearlyReport() {
-  const year = new Date().getFullYear();
-  const res = await fetch(`/api/report/year/${year}`);
-  const data = await res.json();
-  
-  const labels = data.map(d => d.category);
-  const totals = data.map(d => d.total);
-  
-  const ctx = document.getElementById('yearlyChart').getContext('2d');
-  if (yearlyChart) yearlyChart.destroy(); // remove old chart
-  yearlyChart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-      labels: labels,
-      datasets: [{
-          label: `Expenses by Category for ${year}`,
-          data: totals,
-          backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)'
-          ]
-      }]
-      },
-      options: { responsive: true }
-  });
-  }
-  </script>
-  -->
 
 </body>
 

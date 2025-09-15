@@ -60,29 +60,21 @@ app.get("/api/paidby", (req, res) => {
   });
 });
 
-/*
-// Report: totals by category in a year
-app.get("/api/report/year/:year", (req, res) => {
-  const rows = db.prepare(`
-    SELECT category, SUM(amount) AS total
-    FROM expenses
-    WHERE strftime('%Y', date) = ?
-    GROUP BY category
-  `).all(req.params.year);
-  res.json(rows);
+app.get("/api/report/year/:year", async (req, res) => {
+  const { year } = req.params;
+  try {
+    const rows = await db.all(
+      `SELECT category, SUM(amount) as total
+       FROM expenses
+       WHERE strftime('%Y', date) = ?
+       GROUP BY category`,
+      [year]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load yearly report" });
+  }
 });
-
-// Monthly totals in a year
-app.get("/api/report/monthly/:year", (req, res) => {
-  const rows = db.prepare(`
-    SELECT strftime('%m', date) AS month, SUM(amount) AS total
-    FROM expenses
-    WHERE strftime('%Y', date) = ?
-    GROUP BY month
-    ORDER BY month
-  `).all(req.params.year);
-  res.json(rows);
-});
-*/
 
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));

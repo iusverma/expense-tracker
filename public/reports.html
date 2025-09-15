@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Reports</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #expensesTable,
+    #yearlyTable {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #expensesTable th,
+    #expensesTable td,
+    #yearlyTable th,
+    #yearlyTable td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: left;
+    }
+
+    #expensesTable th,
+    #yearlyTable th {
+      background: #f4f4f4;
+    }
+
+    .nav {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+    }
+
+    .nav a {
+      margin-left: 10px;
+      text-decoration: none;
+      color: blue;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="nav">
+    <a href="index.html">🏠 Back to Entry</a>
+  </div>
+
+  <h2>Expense Reports</h2>
+
+  <!-- Section 1: Current Month Expenses -->
+  <h3>Current Month Expenses</h3>
+  <table id="expensesTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Note</th>
+        <th>Paid By</th>
+        <th>Recurring</th>
+        <th>ThreeFs</th>
+        <th>Custom Details</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Section 2: Yearly Summary -->
+  <h3>Yearly Summary</h3>
+  <label for="yearSelect">Select Year:</label>
+  <select id="yearSelect"></select>
+  <button onclick="loadYearlyReport()">Show</button>
+
+  <table id="yearlyTable">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadCurrentMonthExpenses() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1; // 1–12
+
+      //const res = await fetch(`/api/expenses/month/${year}/${month}`);
+      const res = await fetch("/api/expenses");
+      const data = await res.json();
+
+      const tbody = document.querySelector("#expensesTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(exp => {
+        const row = `<tr>
+          <td>${exp.date}</td>
+          <td>$${exp.amount.toFixed(2)}</td>
+          <td>${exp.category}</td>
+          <td>${exp.note || ""}</td>
+          <td>${exp.paid_by}</td>
+          <td>${exp.recurring}</td>
+          <td>${exp.threefs}</td>
+          <td>${exp.custom || ""}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    async function loadYearlyReport() {
+      const year = document.getElementById("yearSelect").value;
+      const res = await fetch(`/api/report/year/${year}`);
+      const data = await res.json();
+
+      const tbody = document.querySelector("#yearlyTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const tr = `<tr>
+          <td>${row.category}</td>
+          <td>$${row.total.toFixed(2)}</td>
+        </tr>`;
+        tbody.innerHTML += tr;
+      });
+    }
+
+    // Fill year dropdown
+    function populateYearDropdown() {
+      const select = document.getElementById("yearSelect");
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= currentYear - 5; y--) {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = y;
+        select.appendChild(opt);
+      }
+    }
+
+    // On page load
+    populateYearDropdown();
+    loadCurrentMonthExpenses();
+  </script>
+
+</body>
+
+</html>
