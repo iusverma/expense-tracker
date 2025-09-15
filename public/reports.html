@@ -89,7 +89,7 @@
     <tbody></tbody>
   </table>
 
-  <!-- Section 2: Yearly Summary -->
+  <!-- Yearly Summary -->
   <h3>Yearly Summary</h3>
   <label for="yearSelect">Select Year:</label>
   <select id="yearSelect"></select>
@@ -99,7 +99,9 @@
     <thead>
       <tr>
         <th>Category</th>
-        <th>Total</th>
+        <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th>
+        <th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>
+        <th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -115,7 +117,7 @@
       const totalRes = await fetch(`/api/expenses/month/${year}/${month}/total`);
       const totalData = await totalRes.json();
       document.getElementById("monthTotal").textContent =
-         `Total: $${totalData.total.toFixed(2)}`;
+        `Total: $${totalData.total.toFixed(2)}`;
 
       const res = await fetch(`/api/expenses/month/${year}/${month}`);
       const data = await res.json();
@@ -142,14 +144,21 @@
       const res = await fetch(`/api/report/year/${year}`);
       const data = await res.json();
 
+      const report = {};
+      data.forEach(item => {
+        if (!report[item.category]) report[item.category] = Array(12).fill(0);
+        report[item.category][parseInt(item.month)-1] = item.total;
+      });
+
       const tbody = document.querySelector("#yearlyTable tbody");
       tbody.innerHTML = "";
-      data.forEach(row => {
-        const tr = `<tr>
-          <td>${row.category}</td>
-          <td>$${row.total.toFixed(2)}</td>
+
+      Object.keys(report).forEach(category => {
+        const row = `<tr>
+          <td>${category}</td>
+          ${report[category].map(val => `<td>$${val.toFixed(2)}</td>`).join('')}
         </tr>`;
-        tbody.innerHTML += tr;
+        tbody.innerHTML += row;
       });
     }
 
