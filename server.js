@@ -58,6 +58,20 @@ app.get("/api/expenses/month/:year/:month", (req, res) => {
   res.json(rows);
 });
 
+// Total expenses for a month
+app.get("/api/expenses/month/:year/:month/total", (req, res) => {
+  const { year, month } = req.params;
+  const ym = `${year}-${String(month).padStart(2, "0")}`;
+
+  const row = db.prepare(`
+    SELECT SUM(amount) as total
+    FROM expenses
+    WHERE strftime('%Y-%m', date) = ?
+  `).get(ym);
+
+  res.json({ total: row.total || 0 });
+});
+
 // Serve paid_by options from file
 app.get("/api/paidby", (req, res) => {
   const filePath = path.join(__dirname, "config/paidby.txt");

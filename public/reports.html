@@ -31,6 +31,22 @@
       background: #f4f4f4;
     }
 
+    .month-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .month-header h3 {
+      margin: 0;
+    }
+
+    .month-header #monthTotal {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
     .nav {
       position: fixed;
       top: 20px;
@@ -53,7 +69,10 @@
   <h2>Expense Reports</h2>
 
   <!-- Section 1: Current Month Expenses -->
-  <h3>Current Month Expenses</h3>
+  <div class="month-header">
+    <h3>Current Month Expenses</h3>
+    <span id="monthTotal">Total: $0.00</span>
+  </div>
   <table id="expensesTable">
     <thead>
       <tr>
@@ -91,6 +110,12 @@
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth() + 1; // 1–12
+
+      // Fetch total
+      const totalRes = await fetch(`/api/expenses/month/${year}/${month}/total`);
+      const totalData = await totalRes.json();
+      document.getElementById("monthTotal").textContent =
+         `Total: $${totalData.total.toFixed(2)}`;
 
       const res = await fetch(`/api/expenses/month/${year}/${month}`);
       const data = await res.json();
