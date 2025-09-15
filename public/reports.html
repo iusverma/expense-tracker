@@ -96,14 +96,7 @@
   <button onclick="loadYearlyReport()">Show</button>
 
   <table id="yearlyTable">
-    <thead>
-      <tr>
-        <th>Category</th>
-        <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th>
-        <th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>
-        <th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
-      </tr>
-    </thead>
+    <thead></thead>
     <tbody></tbody>
   </table>
 
@@ -144,23 +137,57 @@
       const res = await fetch(`/api/report/year/${year}`);
       const data = await res.json();
 
-      const report = {};
-      data.forEach(item => {
-        if (!report[item.category]) report[item.category] = Array(12).fill(0);
-        report[item.category][parseInt(item.month)-1] = item.total;
+      // 1. Get all unique categories
+      const categories = [...new Set(data.map(item => item.category))];
+
+      // 2. Initialize month x category matrix
+      const monthlyData = Array.from({ length: 12 }, () => {
+        const obj = {};
+        categories.forEach(cat => obj[cat] = 0);
+        return obj;
       });
 
+      // 3. Fill data
+      data.forEach(item => {
+        const monthIndex = parseInt(item.month) - 1;
+        monthlyData[monthIndex][item.category] = item.total;
+      });
+
+      // 4. Build table header dynamically
+      const thead = document.querySelector("#yearlyTable thead");
+      thead.innerHTML = `<tr><th>Month</th>${categories.map(c => `<th>${c}</th>`).join('')}<th>Total</th></tr>`;
+
+      // 5. Build table body
       const tbody = document.querySelector("#yearlyTable tbody");
       tbody.innerHTML = "";
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-      Object.keys(report).forEach(category => {
+      // Totals for each category
+      const categoryTotals = {};
+      categories.forEach(cat => categoryTotals[cat] = 0);
+
+      monthlyData.forEach((monthObj, idx) => {
+        const monthTotal = Object.values(monthObj).reduce((a, b) => a + b, 0);
+        categories.forEach(cat => categoryTotals[cat] += monthObj[cat]);
+
         const row = `<tr>
-          <td>${category}</td>
-          ${report[category].map(val => `<td>$${val.toFixed(2)}</td>`).join('')}
+          <td>${monthNames[idx]}</td>
+          ${categories.map(cat => `<td>$${monthObj[cat].toFixed(2)}</td>`).join('')}
+          <td>$${monthTotal.toFixed(2)}</td>
         </tr>`;
         tbody.innerHTML += row;
       });
+
+      // 6. Add final row for category totals
+      const grandTotal = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
+      const totalRow = `<tr>
+        <td><strong>Total</strong></td>
+        ${categories.map(cat => `<td><strong>$${categoryTotals[cat].toFixed(2)}</strong></td>`).join('')}
+        <td><strong>$${grandTotal.toFixed(2)}</strong></td>
+      </tr>`;
+      tbody.innerHTML += totalRow;
     }
+
 
     // Fill year dropdown
     function populateYearDropdown() {
