@@ -24,12 +24,17 @@ app.use(express.static("public")); // serve frontend files
 
 // Add expense
 app.post("/api/expenses", (req, res) => {
-  const { date, amount, category, note, paid_by } = req.body;
-  if (!date || !amount || !category || !paid_by) {
+  const { date, amount, category, note, paid_by, recurring, threefs, custom } = req.body;
+  if (!date || !amount || !category || !paid_by || !recurring || !threefs) {
     return res.status(400).json({ error: "Missing fields" });
   }
-  const stmt = db.prepare("INSERT INTO expenses (date, amount, category, note, paid_by) VALUES (?, ?, ?, ?, ?)");
-  const info = stmt.run(date, amount, category, note, paid_by);
+  const stmt = db.prepare(
+    "INSERT INTO expenses " +
+    "(date, amount, category, note, paid_by, recurring, threefs, custom) " +
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  );
+  const info = stmt.run(date, amount, category, note,
+    paid_by, recurring, threefs, custom);
   res.json({ success: true, id: info.lastInsertRowid });
 });
 

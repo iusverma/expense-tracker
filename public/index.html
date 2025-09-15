@@ -92,8 +92,8 @@
     </select>
 
     <!-- Row 5: Custom -->
-    <label for="custom">Custom Details:</label>
-    <input type="text" id="custom" placeholder="Enter details" style="grid-column: span 3;">
+    <label for="custom">Custom Tags:</label>
+    <input type="text" id="custom" placeholder="Additional Tags" style="grid-column: span 3;">
 
     <!-- Row 6: Button -->
     <div></div>
@@ -116,18 +116,18 @@
         custom: document.getElementById("custom").value
       };
 
-        // Send data to server
-        await fetch("/api/expenses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(expense)
-        });
+      // Send data to server
+      await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(expense)
+      });
 
-        // Reset form
-        e.target.reset();
+      // Reset form
+      e.target.reset();
 
-        // Set focus back to the first field
-        document.getElementById("date").focus();
+      // Set focus back to the first field
+      document.getElementById("date").focus();
     });
 
     async function loadCategories() {
